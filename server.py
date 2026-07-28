@@ -21,18 +21,18 @@ tasks = [
     }
 ]
 
-@app.get("/tasks")
+@app.get("/tasks", summary="get all tasks")
 async def get_tasks():
     return tasks
 
-@app.get("/tasks/{id}")
+@app.get("/tasks/{id}", summary="get a task by id")
 async def get_task(id: int):
     try:
         return tasks[id-1]
     except IndexError:
         raise HTTPException(status_code=404, detail="Task not found")
 
-@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+@app.post("/tasks", status_code=status.HTTP_201_CREATED, summary="create a new task")
 async def create_task(t:dict):
     title= t.get("title")
     if not title or title.strip() == "":
@@ -46,7 +46,7 @@ async def create_task(t:dict):
     tasks.append(new_task)
     return new_task
 
-@app.put("/tasks/{id}")
+@app.put("/tasks/{id}", summary="update a task")
 async def update_task(id: int, t: dict):
     for task in tasks:
         if task["id"] == id:
@@ -68,7 +68,7 @@ async def update_task(id: int, t: dict):
 
 from fastapi import Response
 
-@app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="delete a task")
 async def delete_task(id: int):
     for index, task in enumerate(tasks):
         if task["id"] == id:
@@ -77,10 +77,10 @@ async def delete_task(id: int):
 
     raise HTTPException(status_code=404, detail="Task not found")
 
-@app.get("/")
+@app.get("/",summary="get the task api docs")
 async def root():
     return { "name": "Task API", "version": "1.0", "endpoints": ["/tasks"] }
 
-@app.get("/health")
+@app.get("/health",summary="get the health of the task api")
 async def health():
     return {"status": "ok", "length": len(tasks)}
