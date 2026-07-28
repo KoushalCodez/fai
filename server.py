@@ -1,4 +1,5 @@
-from fastapi import FastAPI,HTTPException
+import json
+from fastapi import FastAPI, HTTPException, status
 
 app = FastAPI()
 
@@ -31,6 +32,19 @@ async def get_task(id: int):
     except IndexError:
         raise HTTPException(status_code=404, detail="Task not found")
 
+@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+async def create_task(t:dict):
+    title= t.get("title")
+    if not title or title.strip() == "":
+        raise HTTPException(status_code=400, detail="Title is required")
+    new_task_id = len(tasks) + 1
+    new_task = {
+        "id": new_task_id,
+        "title": title,
+        "done": False
+    }
+    tasks.append(new_task)
+    return new_task
 
 
 @app.get("/")
@@ -39,7 +53,4 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
-
-
-
+    return {"status": "ok", "length": len(tasks)}
