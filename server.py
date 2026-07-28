@@ -46,6 +46,36 @@ async def create_task(t:dict):
     tasks.append(new_task)
     return new_task
 
+@app.put("/tasks/{id}")
+async def update_task(id: int, t: dict):
+    for task in tasks:
+        if task["id"] == id:
+            title = t.get("title")
+            done = t.get("done")
+
+            if title is None or title.strip() == "":
+                raise HTTPException(
+                    status_code=400,
+                    detail="Title is required"
+                )
+
+            task["title"] = title
+            task["done"] = done
+
+            return task
+
+    raise HTTPException(status_code=404, detail="Task not found")
+
+from fastapi import Response
+
+@app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_task(id: int):
+    for index, task in enumerate(tasks):
+        if task["id"] == id:
+            tasks.pop(index)
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    raise HTTPException(status_code=404, detail="Task not found")
 
 @app.get("/")
 async def root():
