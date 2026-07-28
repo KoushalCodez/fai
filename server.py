@@ -1,4 +1,3 @@
-import json
 from fastapi import FastAPI, HTTPException, status
 
 app = FastAPI()
@@ -25,12 +24,16 @@ tasks = [
 async def get_tasks():
     return tasks
 
-@app.get("/tasks/{id}", summary="get a task by id")
+@app.get("/tasks/{id}", summary="Get a task by ID")
 async def get_task(id: int):
-    try:
-        return tasks[id-1]
-    except IndexError:
-        raise HTTPException(status_code=404, detail="Task not found")
+    for task in tasks:
+        if task["id"] == id:
+            return task
+
+    raise HTTPException(
+        status_code=404,
+        detail="Task not found"
+    )
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, summary="create a new task")
 async def create_task(t:dict):
