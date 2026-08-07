@@ -12,14 +12,15 @@ cursor.execute("""
         done BOOLEAN
     )
 """)
+
 cursor.execute("SELECT COUNT(*) FROM tasks")
 count = cursor.fetchone()[0]
 
 if count == 0:
     seed_tasks = [
-        ("Complete FastAPI assignment", False),
-        ("Learn Pydantic models", True),
-        ("Build a Todo API", False)
+        ("Complete FastAPI assignment", 0),
+        ("Learn Pydantic models", 1),
+        ("Build a Todo API", 0)
     ]
     cursor.executemany("INSERT INTO tasks (title, done) VALUES (?, ?)", seed_tasks)
     conn.commit()
@@ -45,7 +46,13 @@ tasks = [
 
 @app.get("/tasks", summary="get all tasks")
 async def get_tasks():
-    return tasks
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, title, done FROM tasks")
+    db_tasks = [{"id": row["id"], "title": row["title"], "done": bool(row["done"])} for row in cursor.fetchall()]
+    conn.close()
+    return db_tasks
 
 @app.get("/tasks/{id}", summary="Get a task by ID")
 async def get_task(id: int):
