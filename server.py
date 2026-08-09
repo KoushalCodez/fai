@@ -49,21 +49,27 @@ async def get_tasks():
     conn = sqlite3.connect("tasks.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT id, title, done FROM tasks")
+    cursor.execute("SELECT * FROM tasks")
     db_tasks = [{"id": row["id"], "title": row["title"], "done": bool(row["done"])} for row in cursor.fetchall()]
     conn.close()
     return db_tasks
 
 @app.get("/tasks/{id}", summary="Get a task by ID")
 async def get_task(id: int):
-    for task in tasks:
-        if task["id"] == id:
-            return task
-
-    raise HTTPException(
-        status_code=404,
-        detail="Task not found"
-    )
+    conn = sqlite3.connect("tasks.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    row = cursor.fetchone()
+    conn.close()
+    
+    if row is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found"
+        )
+        
+    return {"id": row["id"], "title": row["title"], "done": bool(row["done"])}
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, summary="create a new task")
 async def create_task(t:dict):
