@@ -73,17 +73,22 @@ async def get_task(id: int):
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, summary="create a new task")
 async def create_task(t:dict):
-    title= t.get("title")
+    title = t.get("title")
     if not title or title.strip() == "":
         raise HTTPException(status_code=400, detail="Title is required")
-    new_task_id = len(tasks) + 1
-    new_task = {
+        
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", (title, False))
+    conn.commit()
+    new_task_id = cursor.lastrowid
+    conn.close()
+    
+    return {
         "id": new_task_id,
         "title": title,
         "done": False
     }
-    tasks.append(new_task)
-    return new_task
 
 @app.put("/tasks/{id}", summary="update a task")
 async def update_task(id: int, t: dict):
