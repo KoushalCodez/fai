@@ -118,3 +118,15 @@ http://localhost:8000/docs
 # Author
 
 Koushal Hegde
+
+---
+
+# Database Checkpoint
+
+**Query:**
+```sql
+SELECT * FROM tasks WHERE done = 1;
+```
+
+**Result:**
+It returned all rows where the `done` column was set to 1, proving that the SQLite database is the single source of truth and instantly reflects changes made by hand in DB Browser without a server restart.
