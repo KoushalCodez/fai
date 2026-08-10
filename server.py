@@ -26,23 +26,7 @@ if count == 0:
     conn.commit()
 conn.close()
 
-tasks = [
-    {
-        "id": 1,
-        "title": "Complete FastAPI assignment",
-        "done": False
-    },
-    {
-        "id": 2,
-        "title": "Learn Pydantic models",
-        "done": True
-    },
-    {
-        "id": 3,
-        "title": "Build a Todo API",
-        "done": False
-    }
-]
+
 
 @app.get("/tasks", summary="get all tasks")
 async def get_tasks():
@@ -133,4 +117,9 @@ async def root():
 
 @app.get("/health",summary="get the health of the task api")
 async def health():
-    return {"status": "ok", "length": len(tasks)}
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM tasks")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return {"status": "ok", "length": count}

@@ -119,6 +119,12 @@ Koushal
 
 ---
 
+# Why SQLite?
+
+SQLite was chosen for this project because it is a lightweight, serverless, and self-contained database engine. It requires zero configuration, stores the entire database in a single file (`tasks.db`), and is perfectly suited for small to medium-sized applications, rapid prototyping, and demonstrating persistence without the overhead of running a separate database server.
+
+---
+
 # Database Checkpoint
 
 **Query:**
@@ -128,3 +134,5 @@ SELECT * FROM tasks WHERE done = 1;
 
 **Result:**
 It returned all rows where the `done` column was set to 1, proving that the SQLite database is the single source of truth and instantly reflects changes made by hand in DB Browser without a server restart.
+
+![DB Browser Screenshot](images/tasks.png)
