@@ -92,34 +92,40 @@ async def create_task(t:dict):
 
 @app.put("/tasks/{id}", summary="update a task")
 async def update_task(id: int, t: dict):
-    for task in tasks:
-        if task["id"] == id:
-            title = t.get("title")
-            done = t.get("done")
+    title = t.get("title")
+    done = t.get("done")
 
-            if title is None or title.strip() == "":
-                raise HTTPException(
-                    status_code=400,
-                    detail="Title is required"
-                )
+    if title is None or title.strip() == "":
+        raise HTTPException(status_code=400, detail="Title is required")
 
-            task["title"] = title
-            task["done"] = done
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("UPDATE tasks SET title = ?, done = ? WHERE id = ?", (title, done, id))
+    
+    if cursor.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+        
+    conn.commit()
+    conn.close()
 
-            return task
-
-    raise HTTPException(status_code=404, detail="Task not found")
+    return {"id": id, "title": title, "done": bool(done)}
 
 from fastapi import Response
 
 @app.delete("/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="delete a task")
 async def delete_task(id: int):
-    for index, task in enumerate(tasks):
-        if task["id"] == id:
-            tasks.pop(index)
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-    raise HTTPException(status_code=404, detail="Task not found")
+    conn = sqlite3.connect("tasks.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (id,))
+    
+    if cursor.rowcount == 0:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+        
+    conn.commit()
+    conn.close()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.get("/",summary="get the task api docs")
 async def root():
