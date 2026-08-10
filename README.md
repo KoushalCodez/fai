@@ -30,10 +30,8 @@ pip install fastapi uvicorn
 ### Run the application
 
 ```bash
-uvicorn main:app --reload
+uvicorn server:app --reload
 ```
-
-> Replace `main` with your Python filename if it is different.
 
 The API will be available at:
 
