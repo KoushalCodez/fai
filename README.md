@@ -117,7 +117,7 @@ http://localhost:8000/docs
 
 # Author
 
-Koushal Hegde
+Koushal
 
 ---
 
