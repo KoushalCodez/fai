@@ -136,3 +136,13 @@ SELECT * FROM tasks WHERE done = 1;
 It returned all rows where the `done` column was set to 1, proving that the SQLite database is the single source of truth and instantly reflects changes made by hand in DB Browser without a server restart.
 
 ![DB Browser Screenshot](images/tasks.png)
+
+---
+
+# Postgres Database Setup (Docker)
+
+To run the Postgres database locally using Docker, execute the following command:
+
+```bash
+docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
+```
