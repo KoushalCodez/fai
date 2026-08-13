@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Response
+from fastapi.responses import JSONResponse
 import repository
 
 app = FastAPI()
@@ -14,9 +15,9 @@ async def get_tasks():
 async def get_task(id: int):
     task = repository.get_task_by_id(id)
     if task is None:
-        raise HTTPException(
+        return JSONResponse(
             status_code=404,
-            detail="Task not found"
+            content={"error": "Task not found"}
         )
     return task
 
@@ -39,7 +40,7 @@ async def update_task(id: int, t: dict):
     rowcount = repository.update_task(id, title, bool(done))
     
     if rowcount == 0:
-        raise HTTPException(status_code=404, detail="Task not found")
+        return JSONResponse(status_code=404, content={"error": "Task not found"})
 
     return {"id": id, "title": title, "done": bool(done)}
 
@@ -48,7 +49,7 @@ async def delete_task(id: int):
     rowcount = repository.delete_task(id)
     
     if rowcount == 0:
-        raise HTTPException(status_code=404, detail="Task not found")
+        return JSONResponse(status_code=404, content={"error": "Task not found"})
         
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
