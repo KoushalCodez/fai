@@ -1,47 +1,34 @@
 # Task API
 
-A simple RESTful Task Management API built with **FastAPI**. This project demonstrates a complete CRUD (Create, Read, Update, Delete) API using an in-memory list of tasks.
+A complete, dockerized RESTful Task Management API built with **FastAPI** and **PostgreSQL**. This project demonstrates a production-ready CRUD (Create, Read, Update, Delete) API, fully containerized with persistent volumes.
 
-## Features
+## Getting Started
 
-- View all tasks
-- View a task by ID
-- Create a new task
-- Update an existing task
-- Delete a task
-- Automatic Swagger API documentation
+You only need one command to run the entire stack (API + Database):
+
+```bash
+docker compose up -d
+```
+
+### Environment Variables
+
+Before running, make sure you configure your local environment by copying `.env.example` to `.env`. 
+
+```bash
+cp .env.example .env
+```
+*(Note: Never commit your real `.env` file! A leaked database password is a real security incident)*
+
+Your `.env` file should look like this:
+```env
+DATABASE_URL=postgres://postgres:placeholder@localhost:5433/taskdb
+```
 
 ---
 
-## Installation & Run
+## API Endpoints
 
-### Prerequisites
-
-- Python 3.10+
-- FastAPI
-- Uvicorn
-
-### Install dependencies
-
-```bash
-pip install fastapi uvicorn
-```
-
-### Run the application
-
-```bash
-uvicorn server:app --reload
-```
-
-The API will be available at:
-
-- API: http://localhost:8000
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
-
----
-
-# API Endpoints
+The API is accessible at `http://localhost:3000`.
 
 | Method | Endpoint | Description | Success Status |
 |---------|----------|-------------|----------------|
@@ -50,29 +37,29 @@ The API will be available at:
 | GET | `/tasks` | Get all tasks | 200 |
 | GET | `/tasks/{id}` | Get a task by ID | 200 / 404 |
 | POST | `/tasks` | Create a task | 201 / 400 |
-| PUT | `/tasks/{id}` | Update a task | 200 / 400 / 404 |
+| PUT | `/tasks/{id}` | Update a task | 200 / 404 |
 | DELETE | `/tasks/{id}` | Delete a task | 204 / 404 |
 
 ---
 
-# Example curl Output
+## Example Usage
 
 ### Create a Task
 
 ```bash
-curl -i -X POST http://localhost:8000/tasks ^
--H "Content-Type: application/json" ^
--d "{\"title\":\"Buy milk\"}"
+curl -i -X POST http://localhost:3000/tasks \
+-H "Content-Type: application/json" \
+-d '{"title":"Buy milk"}'
 ```
 
-Example output
-
+**Output:**
 ```http
 HTTP/1.1 201 Created
+content-length: 44
 content-type: application/json
 
 {
-  "id": 4,
+  "id": 1,
   "title": "Buy milk",
   "done": false
 }
@@ -80,69 +67,22 @@ content-type: application/json
 
 ---
 
-# Swagger UI
+## Database Verification
 
-Open the following URL in your browser:
+The database volume persists your tasks across container restarts. You can view the data manually using any PostgreSQL GUI (like DBeaver, pgAdmin, or TablePlus).
 
-```
-http://localhost:8000/docs
-```
+![Database Screenshot](images/db_screenshot.png)
 
-![Swagger Screenshot](images/swagger.png)
+*(Add your own screenshot of the database table here!)*
 
----
-
-# Project Structure
-
-```
-.
-├── main.py
-├── README.md
-└── images
-    └── swagger.png
-```
-
----
-
-# Technologies Used
-
-- Python
-- FastAPI
-- Uvicorn
-- Swagger UI (OpenAPI)
-
----
-
-# Author
-
-Koushal
-
----
-
-# Why SQLite?
-
-SQLite was chosen for this project because it is a lightweight, serverless, and self-contained database engine. It requires zero configuration, stores the entire database in a single file (`tasks.db`), and is perfectly suited for small to medium-sized applications, rapid prototyping, and demonstrating persistence without the overhead of running a separate database server.
-
----
-
-# Database Checkpoint
-
-**Query:**
+*To check manually via `psql` (inside the container):*
 ```sql
-SELECT * FROM tasks WHERE done = 1;
+SELECT * FROM tasks;
 ```
-
-**Result:**
-It returned all rows where the `done` column was set to 1, proving that the SQLite database is the single source of truth and instantly reflects changes made by hand in DB Browser without a server restart.
-
-![DB Browser Screenshot](images/tasks.png)
 
 ---
 
-# Postgres Database Setup (Docker)
-
-To run the Postgres database locally using Docker, execute the following command:
-
-```bash
-docker run --name taskdb -e POSTGRES_PASSWORD=dev -e POSTGRES_DB=tasks -p 5432:5432 -v taskdata:/var/lib/postgresql/data -d postgres:17
-```
+## Technologies Used
+- **Python** (FastAPI, Uvicorn)
+- **PostgreSQL** (with psycopg binary)
+- **Docker** & **Docker Compose**
