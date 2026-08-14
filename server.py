@@ -1,11 +1,15 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, status, Response
 from fastapi.responses import JSONResponse
 import repository
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # First-run: Setup DB on startup
+    repository.init_db()
+    yield
 
-# First-run: Setup DB on startup
-repository.init_db()
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/tasks", summary="get all tasks")
 async def get_tasks():
@@ -15,10 +19,7 @@ async def get_tasks():
 async def get_task(id: int):
     task = repository.get_task_by_id(id)
     if task is None:
-        return JSONResponse(
-            status_code=404,
-            content={"error": "Task not found"}
-        )
+        raise HTTPException(status_code=404, detail="Task not found")
     return task
 
 @app.post("/tasks", status_code=status.HTTP_201_CREATED, summary="create a new task")
@@ -40,7 +41,7 @@ async def update_task(id: int, t: dict):
     rowcount = repository.update_task(id, title, bool(done))
     
     if rowcount == 0:
-        return JSONResponse(status_code=404, content={"error": "Task not found"})
+        raise HTTPException(status_code=404, detail="Task not found")
 
     return {"id": id, "title": title, "done": bool(done)}
 
@@ -49,7 +50,7 @@ async def delete_task(id: int):
     rowcount = repository.delete_task(id)
     
     if rowcount == 0:
-        return JSONResponse(status_code=404, content={"error": "Task not found"})
+        raise HTTPException(status_code=404, detail="Task not found")
         
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 

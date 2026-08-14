@@ -50,12 +50,12 @@ def create_task(title: str):
     with get_connection() as conn:
         with conn.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING id",
+                "INSERT INTO tasks (title, done) VALUES (%s, %s) RETURNING *",
                 (title, False)
             )
-            new_id = cursor.fetchone()['id']
+            new_task = cursor.fetchone()
         conn.commit()
-        return {"id": new_id, "title": title, "done": False}
+        return new_task
 
 def update_task(task_id: int, title: str, done: bool):
     with get_connection() as conn:
